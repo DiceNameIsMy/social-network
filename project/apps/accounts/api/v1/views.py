@@ -6,6 +6,8 @@ from rest_framework.generics import (
     RetrieveUpdateAPIView
 )
 
+from apps.chat.models import Chat
+from apps.chat.api.v1.serializers import ChatSerializer
 from apps.utils.filters import URLRelatedFilter
 
 from .serializers import UserCardSerializer, UserDetailSerializer
@@ -31,3 +33,14 @@ class UserFriendsView(ListAPIView):
 
     serializer_class = UserCardSerializer
     queryset = UserModel.objects.all()
+
+
+class UserChatsView(ListAPIView):
+    filter_backends = [URLRelatedFilter]
+    url_related_field = 'members'
+
+    def get_url_related_pk(self):
+        return self.request.user
+
+    serializer_class = ChatSerializer
+    queryset = Chat.objects.all()

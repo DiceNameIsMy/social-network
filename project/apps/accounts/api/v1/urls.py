@@ -1,6 +1,7 @@
 from django.urls import path, include
 
 from .views import (
+    UserChatsView,
     UserListView,
     UserRetrieveView,
     UserFriendsView
@@ -12,6 +13,6 @@ urlpatterns = [
     path('users/<int:pk>/friends/', UserFriendsView.as_view()),
 
     path('auth/', include('dj_rest_auth.urls')),
-    # path('auth/user/chats/', _.as_view()),
+    path('auth/user/chats/', UserChatsView.as_view()),
     path('auth/signup/', include('dj_rest_auth.registration.urls'))
 ]

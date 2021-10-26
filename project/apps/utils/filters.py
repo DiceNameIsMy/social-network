@@ -7,9 +7,14 @@ class URLRelatedFilter(BaseFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
         assert hasattr(view, self.related_field), f'`{self.related_field}` should be provided'
-        assert hasattr(view, self.related_kwarg), f'`{self.related_kwarg}` should be provided'
+
+        if hasattr(view, 'get_url_related_pk'):
+            pk = view.get_url_related_pk()
+        else:
+            assert hasattr(view, self.related_kwarg), f'`{self.related_kwarg}` should be provided'
+            pk = view.kwargs[getattr(view, self.related_kwarg)]
 
         filter_kwarg = {
-            getattr(view, self.related_field): view.kwargs[getattr(view, self.related_kwarg)]
+            getattr(view, self.related_field): pk
         }
         return queryset.filter(**filter_kwarg)
