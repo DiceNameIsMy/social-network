@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
+from apps.chat.admin import MembershipInline
+
 from .models import CustomUser
 
 
@@ -14,4 +16,4 @@ class CustomUserAdmin(UserAdmin):
         }),
         (('Important dates'), {'fields': (('last_login', 'date_joined'), )}),
     )
-    pass
+    inlines = [MembershipInline]
