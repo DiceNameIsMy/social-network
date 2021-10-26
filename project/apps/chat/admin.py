@@ -18,6 +18,6 @@ class MembershipInline(admin.TabularInline):
 
 @admin.register(Chat)
 class ChatAdmin(admin.ModelAdmin):
-    list_display = ['title', 'members_amount']
+    list_display = ['title', 'type', 'members_amount']
 
     inlines = [MembershipInline, MessageInline]

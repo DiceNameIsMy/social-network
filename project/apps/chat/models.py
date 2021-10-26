@@ -21,11 +21,15 @@ class Chat(models.Model):
 
     type = models.PositiveIntegerField(
         choices=Type.choices,
-        default=Type.COMMON,
-        editable=False
+        default=Type.COMMON
     )
     title = models.CharField(
         max_length=64,
+    )
+    members = models.ManyToManyField(
+        to=UserModel,
+        through='Membership',
+        related_name='chats'
     )
 
     def members_amount(self):
@@ -44,14 +48,23 @@ class Membership(models.Model):
     )
     user = models.ForeignKey(
         to=UserModel,
+        null=True,
         on_delete=models.CASCADE,
         related_name='memberships'
     )
     chat = models.ForeignKey(
         to=Chat,
+        null=True,
         on_delete=models.CASCADE,
         related_name='memberships'
     )
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'chat'],
+                name='unique_users_in_chat'
+            )
+        ]
 
     def clean(self):
         if self.chat.type == ChatType.DIRECT:

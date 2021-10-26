@@ -6,6 +6,7 @@ urlpatterns = [
     path('api/', include([
         path('v1/', include([
             path('accounts/', include('apps.accounts.api.v1.urls')),
+            path('chat/', include('apps.chat.api.v1.urls')),
         ])),
     ])),
 ]
