@@ -14,7 +14,6 @@ class MembershipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Membership
         fields = ['pk', 'type', 'user', 'chat']
-        read_only_fields = ['pk', 'user', 'chat']
 
         validators = [
             UniqueTogetherValidator(

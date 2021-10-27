@@ -11,10 +11,10 @@ from rest_framework.generics import (
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
-from apps.utils.filters import URLRelatedFilter
+from apps.utils.filters import URLRelatedFilter, UserRelatedFilter
 from apps.utils.permissions import IsManyRelated
 from apps.chat.models import Chat, Membership, Message
-from apps.chat.permissions import IsChatMember
+from apps.chat.permissions import IsChatAdminOrMessageSender, IsChatAdminOrReadOnly, IsChatMember, IsChatAdminIfChange
 
 from .serializers import (
     ChatSerializer,
@@ -26,13 +26,16 @@ UserModel = get_user_model()
 
 
 class ChatListCreateView(ListCreateAPIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated]
+    filter_backends = [UserRelatedFilter]
+    user_field = 'members'
+
     serializer_class = ChatSerializer
-    queryset = Chat.objects.all()        
+    queryset = Chat.objects.all()
 
 
 class ChatRetrieveDestroyView(RetrieveDestroyAPIView):
-    permission_classes = [IsAuthenticated, IsManyRelated]
+    permission_classes = [IsAuthenticated, IsManyRelated, IsChatAdminOrReadOnly]
     related_field = 'members'
 
     serializer_class = ChatSerializer
@@ -41,9 +44,9 @@ class ChatRetrieveDestroyView(RetrieveDestroyAPIView):
 
 # Chat related
 class ChatMembersListAddView(ListCreateAPIView):
-    permission_classes = [IsAuthenticated, IsChatMember]
+    permission_classes = [IsAuthenticated, IsChatMember, IsChatAdminIfChange]
     filter_backends = [URLRelatedFilter]
-    url_related_field = 'chat'
+    url_related_field = 'chat_id'
     url_related_kwarg = 'chat_pk'
 
     serializer_class = MembershipSerializer
@@ -51,22 +54,22 @@ class ChatMembersListAddView(ListCreateAPIView):
 
 
 class ChatMemberRetriveExpelView(RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticated, IsChatMember]
+    permission_classes = [IsAuthenticated, IsChatMember, IsChatAdminIfChange]
     url_related_field = 'chat'
     url_related_kwarg = 'chat_pk'
 
     serializer_class = MembershipSerializer
     queryset = Membership.objects.all()
 
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.chat.type == Chat.Type.DIRECT:
-            return Response(
-                data={'detail': 'Not allowed'}, status=400
+    def check_object_permissions(self, request, obj):
+        if request.method == 'DELETE' and obj.chat.type == Chat.Type.DIRECT:
+            self.permission_denied(
+                request,
+                message='direct chat memeber expelling is not allowed',
+                code=400
             )
-        self.perform_destroy(instance)
-        return Response(status=204)
-        
+        super().check_object_permissions(request, obj)
+
 
 class ChatMessageListCreateView(ListCreateAPIView):
     permission_classes = [IsAuthenticated, IsChatMember]
@@ -79,7 +82,7 @@ class ChatMessageListCreateView(ListCreateAPIView):
 
 
 class ChatMessageRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticated, IsChatMember]
+    permission_classes = [IsAuthenticated, IsChatAdminOrMessageSender]
     filter_backends = [URLRelatedFilter]
     url_related_field = 'chat_id'
     url_related_kwarg = 'chat_pk'

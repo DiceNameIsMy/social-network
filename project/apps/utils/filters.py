@@ -7,14 +7,19 @@ class URLRelatedFilter(BaseFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
         assert hasattr(view, self.related_field), f'`{self.related_field}` should be provided'
-
-        if hasattr(view, 'get_url_related_pk'):
-            pk = view.get_url_related_pk()
-        else:
-            assert hasattr(view, self.related_kwarg), f'`{self.related_kwarg}` should be provided'
-            pk = view.kwargs[getattr(view, self.related_kwarg)]
+        assert hasattr(view, self.related_kwarg), f'`{self.related_kwarg}` should be provided'
 
         filter_kwarg = {
-            getattr(view, self.related_field): pk
+            getattr(view, self.related_field): view.kwargs[getattr(view, self.related_kwarg)]
         }
         return queryset.filter(**filter_kwarg)
+
+
+class UserRelatedFilter(BaseFilterBackend):
+    """ add `user_field:str` in your view which
+    is field that is related to user
+    """
+    def filter_queryset(self, request, queryset, view):
+        assert hasattr(view, 'user_field'), '`user_field` should be added in view'
+
+        return queryset.filter(**{view.user_field: request.user})
