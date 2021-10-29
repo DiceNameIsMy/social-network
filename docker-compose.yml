@@ -11,6 +11,19 @@ services:
       - ./.env.dev
     depends_on:
       - db
+
+  messages:
+    build: './messages'
+    container_name: 'social-network_messages'
+    command: uvicorn main:app --host 0.0.0.0 --port 8001
+    ports:
+      - 8001:8001
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - app
+      - db
+
   db:
     image: postgres:13-alpine
     container_name: 'social-network_db'
