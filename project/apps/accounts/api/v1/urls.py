@@ -12,7 +12,7 @@ urlpatterns = [
     path('users/<int:pk>/', UserRetrieveView.as_view()),
     path('users/<int:pk>/friends/', UserFriendsView.as_view()),
 
-    path('auth/', include('dj_rest_auth.urls')),
-    path('auth/user/chats/', UserChatsView.as_view()),
-    path('auth/signup/', include('dj_rest_auth.registration.urls'))
+    path('', include('dj_rest_auth.urls')),
+    path('user/chats/', UserChatsView.as_view()),
+    path('signup/', include('dj_rest_auth.registration.urls'))
 ]
