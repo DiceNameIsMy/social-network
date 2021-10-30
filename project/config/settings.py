@@ -41,6 +41,8 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -120,6 +122,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 40
 }
 REST_AUTH_SERIALIZERS = {
     'USER_DETAILS_SERIALIZER': 'apps.accounts.api.v1.serializers.UserDetailSerializer'
