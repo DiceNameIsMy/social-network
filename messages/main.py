@@ -46,16 +46,15 @@ async def websocket_endpoint(
     )
     try:
         while True:
-            data = await websocket.receive_text()
-            await chat.send_message(
-                user_connection=user_connection, 
-                message=f'{user.username}: {data}'
-            )
+            data = await websocket.receive_json()
+
+            if data['type'] == 'message':
+                await chat.send_message(
+                    user_connection=user_connection, 
+                    message=f'{user.username}: {data["content"]}'
+                )
     except WebSocketDisconnect:
         await chat.disconnect(user_connection)
-        await chat.send_message(
-            user_connection=user_connection, 
-            message=f'`{user.username}` left the chat'
-        )
+
 
 

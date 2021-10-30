@@ -13,7 +13,7 @@
         <label for="chat_id">Chat</label>
         <input type="number" id="chat_id">
     </form><br>
-    
+
     <form action="" onsubmit="sendMessage(event)">
         <label for="messageText">Message</label>
         <input type="text" id="messageText" autocomplete="off" />
@@ -30,16 +30,30 @@
 
         ws = new WebSocket(`ws://${window.location.host}/ws/${chatID}?token=${userToken}`);
         ws.onmessage = function (event) {
-            var messages = document.getElementById('messages')
-            var message = document.createElement('li')
-            var content = document.createTextNode(event.data)
-            message.appendChild(content)
-            messages.appendChild(message)
+            data = JSON.parse(event.data)
+            console.log(data)
+            switch(data.type) {
+              case 'message':
+                let dt = new Date(Date.parse(data.content.datetime))
+                var hour = dt.getHours()
+                var minute = dt.getMinutes() < 10 ? '0' + dt.getMinutes() : dt.getMinutes()
+
+                var messages = document.getElementById('messages')
+                var message = document.createElement('li')
+                var content = document.createTextNode(`${hour}:${minute}    ${data.content.text}`)
+                message.appendChild(content)
+                messages.appendChild(message)
+            }
+
         };
 
         function sendMessage(event) {
             var input = document.getElementById("messageText")
-            ws.send(input.value)
+            var message = {
+                type: "message",
+                content: input.value
+            }
+            ws.send(JSON.stringify(message))
             input.value = ''
             event.preventDefault()
         }

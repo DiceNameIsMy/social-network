@@ -24,8 +24,6 @@ class Connection:
         )
         self.users.append(user_connection)
 
-        await self.send_message(user_connection, f'`{user.username}` entered the room')
-
         return user_connection
 
     async def disconnect(self, user_connection: UserConnection):
@@ -48,12 +46,17 @@ class Connection:
                 'Authorization': f'Bearer {user_connection.user.token}'
             }
         )
+        data = r.json()
         if r.status_code != 201:
-            print(f'SOME ERROR! : {r.json()}')
+            print(f'SOME ERROR! : {data=}')
+
+        message = {
+            'type': 'message',
+            'content': data
+        }
 
         for user_connection in self.users:
-            await user_connection.websocket.send_text(message)
-
+            await user_connection.websocket.send_json(message)
 
 class ConnectionsManager:
     def __init__(self) -> None:
