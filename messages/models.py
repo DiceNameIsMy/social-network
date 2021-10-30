@@ -12,6 +12,8 @@ class User(BaseModel):
 
     is_authenticated: bool = False
 
+    def __bool__(self):
+        return self.is_authenticated
 
 class Membership(BaseModel):
     pk: int
@@ -27,6 +29,9 @@ class Chat(BaseModel):
     members_amount: Optional[int]
 
     is_valid: bool = False
+
+    def __bool__(self):
+        return self.is_valid
 
 
 class UserConnection(BaseModel):

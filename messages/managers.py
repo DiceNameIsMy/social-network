@@ -17,18 +17,19 @@ class Connection:
         user: User, 
         websocket: WebSocket
     ) -> UserConnection:
-        await websocket.accept()
-
         user_connection = UserConnection(
             user=user,
             chat=self.chat,
             websocket=websocket
         )
         self.users.append(user_connection)
+
+        await self.send_message(user_connection, f'`{user.username}` entered the room')
+
         return user_connection
 
-    def disconnect(self, user_connection: UserConnection):
-        user_connection.websocket.close()
+    async def disconnect(self, user_connection: UserConnection):
+        await user_connection.websocket.close()
         self.users.remove(user_connection)
 
         if not self.users:

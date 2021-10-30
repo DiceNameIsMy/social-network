@@ -7,6 +7,13 @@
 
 <body>
     <h1>WebSocket Chat</h1>
+    <form action="" onSubmit="">
+        <label for="token">Token</label>
+        <input type="text" id="token">
+        <label for="chat_id">Chat</label>
+        <input type="number" id="chat_id">
+    </form><br>
+    
     <form action="" onsubmit="sendMessage(event)">
         <label for="messageText">Message</label>
         <input type="text" id="messageText" autocomplete="off" />

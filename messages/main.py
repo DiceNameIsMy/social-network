@@ -32,8 +32,9 @@ async def websocket_endpoint(
     chat: Chat = Depends(get_chat), 
     user: User = Depends(authenticate)
 ):
-    if not all((user.is_authenticated, chat.is_valid)):
-        await websocket.accept()
+    await websocket.accept()
+
+    if not (user and chat):
         await websocket.close()
         return
     
@@ -48,13 +49,13 @@ async def websocket_endpoint(
             data = await websocket.receive_text()
             await chat.send_message(
                 user_connection=user_connection, 
-                message=f'Client {user.username}: {data}'
+                message=f'{user.username}: {data}'
             )
     except WebSocketDisconnect:
-        chat.disconnect(user_connection)
+        await chat.disconnect(user_connection)
         await chat.send_message(
             user_connection=user_connection, 
-            message=f'Client #{user.username} left the chat'
+            message=f'`{user.username}` left the chat'
         )
 
 
