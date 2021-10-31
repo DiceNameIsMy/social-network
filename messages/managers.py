@@ -1,13 +1,12 @@
 from fastapi import WebSocket
 
-from requests import request
-
-from settings import settings
-
 from models import User, UserConnection, Chat
+from utils import send_api_request
 
 
 class Connection:
+    """ Connection to chat
+    """
     def __init__(self, chat: Chat):
         self.chat = chat
         self.users: list[UserConnection] = []
@@ -35,20 +34,18 @@ class Connection:
 
     async def send_message(
         self, 
-        user_connection: UserConnection, 
+        user: User, 
         message: str
     ):
-        r = request(
+        r = send_api_request(
             method='POST',
-            url=f'http://{settings.API_URL}/api/v1/chat/{self.chat.pk}/messages/',
+            url=f'/api/v1/chats/{self.chat.pk}/messages/',
+            user=user,
             data={"text": message},
-            headers={
-                'Authorization': f'Bearer {user_connection.user.token}'
-            }
         )
         data = r.json()
         if r.status_code != 201:
-            print(f'SOME ERROR! : {data=}')
+            raise NotImplementedError('not `201` status code behavior is not implementet')
 
         message = {
             'type': 'message',
@@ -58,7 +55,10 @@ class Connection:
         for user_connection in self.users:
             await user_connection.websocket.send_json(message)
 
+
 class ConnectionsManager:
+    """ Manages connections to chats
+    """
     def __init__(self) -> None:
         self.chats: dict[int, Connection] = {}
 

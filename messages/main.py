@@ -3,16 +3,14 @@ from fastapi.responses import HTMLResponse
 
 from settings import settings
 
-from models import User, UserConnection, Membership, Chat
+from models import User, Chat
 from managers import ConnectionsManager, Connection
 
-from dependencies import authenticate, get_chat
+from dependencies import get_user, get_chat, authenticate
 
 app = FastAPI()
 
 manager = ConnectionsManager()
-
-print(f'http://{settings.API_URL}/api/v1/accounts/user/')
 
 
 @app.get('/')
@@ -29,17 +27,17 @@ async def info():
 @app.websocket('/ws/{chat_id}')
 async def websocket_endpoint(
     websocket: WebSocket,
-    chat: Chat = Depends(get_chat), 
-    user: User = Depends(authenticate)
+    user: User = Depends(get_user),
+    chat: Chat = Depends(get_chat),
 ):
     await websocket.accept()
 
+    # if user or chat wasn't acquired close the connection
     if not (user and chat):
         await websocket.close()
         return
     
     chat: Connection = manager.get_chat_connection(chat)
-
     user_connection = await chat.connect(
         user=user, 
         websocket=websocket
@@ -47,10 +45,9 @@ async def websocket_endpoint(
     try:
         while True:
             data = await websocket.receive_json()
-
             if data['type'] == 'message':
                 await chat.send_message(
-                    user_connection=user_connection, 
+                    user=user, 
                     message=f'{user.username}: {data["content"]}'
                 )
     except WebSocketDisconnect:
