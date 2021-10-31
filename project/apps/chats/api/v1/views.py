@@ -13,8 +13,8 @@ from rest_framework.response import Response
 
 from apps.utils.filters import URLRelatedFilter, UserRelatedFilter
 from apps.utils.permissions import IsManyRelated
-from apps.chat.models import Chat, Membership, Message
-from apps.chat.permissions import IsChatAdminOrMessageSender, IsChatAdminOrReadOnly, IsChatMember, IsChatAdminIfChange
+from apps.chats.models import Chat, Membership, Message
+from apps.chats.permissions import IsChatAdminOrMessageSender, IsChatAdminOrReadOnly, IsChatMember, IsChatAdminIfChange
 
 from .serializers import (
     ChatSerializer,

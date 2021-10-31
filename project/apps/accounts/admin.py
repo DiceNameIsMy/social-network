@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from apps.chat.admin import MembershipInline
+from apps.chats.admin import MembershipInline
 
 from .models import CustomUser
 

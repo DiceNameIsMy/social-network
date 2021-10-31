@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     'corsheaders',
 
     'apps.accounts',
-    'apps.chat',
+    'apps.chats',
     'apps.utils',
 ]
 SITE_ID = 1

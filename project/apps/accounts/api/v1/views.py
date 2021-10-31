@@ -6,8 +6,8 @@ from rest_framework.generics import (
     RetrieveUpdateAPIView
 )
 
-from apps.chat.models import Chat
-from apps.chat.api.v1.serializers import ChatSerializer
+from apps.chats.models import Chat
+from apps.chats.api.v1.serializers import ChatSerializer
 from apps.utils.filters import URLRelatedFilter, UserRelatedFilter
 
 from .serializers import UserCardSerializer, UserDetailSerializer

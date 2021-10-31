@@ -4,7 +4,7 @@ from django.db import transaction
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from apps.chat.models import Chat, Membership, Message
+from apps.chats.models import Chat, Membership, Message
 
 
 UserModel = get_user_model()
