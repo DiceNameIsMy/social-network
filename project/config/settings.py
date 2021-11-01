@@ -132,6 +132,6 @@ REST_AUTH_SERIALIZERS = {
 REST_USE_JWT = True
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=300),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=300),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=3),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
 }
