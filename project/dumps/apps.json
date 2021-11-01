@@ -1,0 +1,595 @@
+[
+{
+    "model": "accounts.customuser",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$260000$7H0S47NhiAgLnywlOOlDQn$GbJJoeBAvGlE6GKUuvGc5O/lUQ7Hd/jEz8jxDQNmppQ=",
+        "last_login": "2021-11-01T14:40:32.978Z",
+        "is_superuser": true,
+        "username": "admin",
+        "first_name": "",
+        "last_name": "",
+        "email": "admin@test.com",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2021-10-31T06:00:11.217Z",
+        "groups": [],
+        "user_permissions": [],
+        "friends": []
+    }
+},
+{
+    "model": "accounts.customuser",
+    "pk": 2,
+    "fields": {
+        "password": "pbkdf2_sha256$260000$9rCFqSLGvbGrGHOsHMMbZe$aar38vwfAiFhwQLUJtekjDTTPpHWlU0YD+R/8KfAinw=",
+        "last_login": "2021-11-01T14:39:00.411Z",
+        "is_superuser": false,
+        "username": "user1",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2021-10-31T06:01:04.549Z",
+        "groups": [],
+        "user_permissions": [],
+        "friends": []
+    }
+},
+{
+    "model": "accounts.customuser",
+    "pk": 3,
+    "fields": {
+        "password": "pbkdf2_sha256$260000$VcBAFXbhAPQXFoTeg5QkO3$srf+3jQ2Vr5fLB9uCVL4i+/OPHA9mXxyCBZJbWG5PbQ=",
+        "last_login": "2021-11-01T14:38:41.856Z",
+        "is_superuser": false,
+        "username": "user2",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2021-10-31T06:01:10.911Z",
+        "groups": [],
+        "user_permissions": [],
+        "friends": []
+    }
+},
+{
+    "model": "accounts.customuser",
+    "pk": 4,
+    "fields": {
+        "password": "pbkdf2_sha256$260000$oS6yQmmGO4y1qvwqztHfnb$SKolbDfexvF3YX+PP3BHrypgORYtvZtcZxemIcdhJ28=",
+        "last_login": "2021-11-01T14:39:50.620Z",
+        "is_superuser": false,
+        "username": "user3",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2021-10-31T06:01:20.011Z",
+        "groups": [],
+        "user_permissions": [],
+        "friends": []
+    }
+},
+{
+    "model": "chats.chat",
+    "pk": 1,
+    "fields": {
+        "type": 1,
+        "title": "user1_and_user2"
+    }
+},
+{
+    "model": "chats.chat",
+    "pk": 2,
+    "fields": {
+        "type": 1,
+        "title": "all_users"
+    }
+},
+{
+    "model": "chats.chat",
+    "pk": 3,
+    "fields": {
+        "type": 2,
+        "title": "direct_admin_and_user1"
+    }
+},
+{
+    "model": "chats.membership",
+    "pk": 1,
+    "fields": {
+        "type": 2,
+        "user": 3,
+        "chat": 1
+    }
+},
+{
+    "model": "chats.membership",
+    "pk": 2,
+    "fields": {
+        "type": 1,
+        "user": 2,
+        "chat": 1
+    }
+},
+{
+    "model": "chats.membership",
+    "pk": 3,
+    "fields": {
+        "type": 2,
+        "user": 3,
+        "chat": 2
+    }
+},
+{
+    "model": "chats.membership",
+    "pk": 4,
+    "fields": {
+        "type": 1,
+        "user": 1,
+        "chat": 2
+    }
+},
+{
+    "model": "chats.membership",
+    "pk": 5,
+    "fields": {
+        "type": 1,
+        "user": 2,
+        "chat": 2
+    }
+},
+{
+    "model": "chats.membership",
+    "pk": 6,
+    "fields": {
+        "type": 1,
+        "user": 1,
+        "chat": 3
+    }
+},
+{
+    "model": "chats.membership",
+    "pk": 7,
+    "fields": {
+        "type": 1,
+        "user": 2,
+        "chat": 3
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 1,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T09:34:06.768Z",
+        "text": "user1: hello guys!!"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 2,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T09:37:56.120Z",
+        "text": "user1: and once again!!"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 3,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T09:44:32.184Z",
+        "text": "user1: hm"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 4,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T09:45:14.605Z",
+        "text": "user1: okay boys, IT'S ALL WORKIN!"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 5,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T09:51:00.614Z",
+        "text": "user1: let's try it one more time"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 6,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T09:52:04.055Z",
+        "text": "user1: huh"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 7,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T09:52:48.521Z",
+        "text": "user1: aight'"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 8,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T09:53:49.087Z",
+        "text": "user1: .."
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 9,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:02:55.784Z",
+        "text": "user1: hehe"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 10,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:05:17.350Z",
+        "text": "user1: um.."
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 11,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:05:45.458Z",
+        "text": "user1: okay"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 12,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:06:07.081Z",
+        "text": "user1: once again"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 13,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:06:46.776Z",
+        "text": "user1: heh"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 14,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:07:56.865Z",
+        "text": "user1: brr"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 15,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:07:57.648Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 16,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:07:58.148Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 17,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:07:58.187Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 18,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:07:58.213Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 19,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:07:58.249Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 20,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:07:58.275Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 21,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:07:58.306Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 22,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:07:58.336Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 23,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:07:58.366Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 24,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:07:58.411Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 25,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:07:58.436Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 26,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:07:58.467Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 27,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:08:02.973Z",
+        "text": "user1: ffffffffffff"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 28,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:08:03.266Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 29,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:08:03.756Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 30,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:08:03.793Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 31,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:08:03.827Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 32,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:08:03.860Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 33,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:08:03.886Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 34,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:08:03.915Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 35,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:08:03.948Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 36,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:08:03.978Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 37,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:08:04.008Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 38,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:08:04.045Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 39,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:08:04.073Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 40,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:08:04.104Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 41,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:08:04.149Z",
+        "text": "user1:"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 42,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:08:34.117Z",
+        "text": "user1: d"
+    }
+},
+{
+    "model": "chats.message",
+    "pk": 43,
+    "fields": {
+        "chat": 1,
+        "sender": 2,
+        "datetime": "2021-10-31T10:46:18.353Z",
+        "text": "user1: heheh"
+    }
+}
+]
