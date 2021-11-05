@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Chat</title>
+</head>
+
+<body>
+	<h1>WebSocket Chat</h1>
+	<form action="" onSubmit="">
+		<label for="token">Token</label>
+		<input type="text" id="token">
+		<label for="chat_id">Chat</label>
+		<input type="number" id="chat_id">
+	</form><br>
+
+	<form action="" onsubmit="sendMessage(event)">
+		<label for="messageText">Message</label>
+		<input type="text" id="messageText" autocomplete="off" />
+		<button>Send</button>
+	</form>
+
+	<ul id="messages">
+	</ul>
+
+	<form action="" onsubmit="loadMoreMessages(event)" id="loadMoreForm"> 
+		<button>Load More</button>
+	</form>
+
+	<script>
+		const queryString = window.location.search;
+		const urlParams = new URLSearchParams(queryString);
+
+		const userToken = urlParams.get("token")
+		const chatID = urlParams.get("chat_id")
+
+		var nextMessageURL = `http://${window.location.host}/api/v1/chats/${chatID}/messages/?limit=30`
+
+		function parseMessage(msg) {
+			const dt = new Date(Date.parse(msg.datetime))
+			const hour = dt.getHours()
+			const raw_minute = dt.getMinutes()
+			const minute = raw_minute < 10 ? "0" + raw_minute : raw_minute
+
+			return (`${hour}:${minute}    ${msg.text}`)
+		}
+
+		async function sendRequest (url) {
+			return await fetch(url, {
+				method: "GET",
+				mode: "cors",
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${userToken}`
+				}
+			})
+		};
+
+		async function setMessages() {
+			if (nextMessageURL === null) {
+				var loadMoreForm = document.getElementById("loadMoreForm")
+				loadMoreForm.style.display = "none";
+				return
+			}
+			const response = await sendRequest(nextMessageURL)
+			if (!response.ok) {
+				window.alert(`Couldn't get messages from chat with pk = ${chatID}`)
+				return
+			}
+			const data = await response.json()
+			const last_messages = data.results
+			nextMessageURL = data.next
+
+			var messages = document.getElementById("messages")
+			
+			for (const i in last_messages) {
+				const raw_msg = last_messages[i]
+				const msg = parseMessage(raw_msg)
+
+				var message = document.createElement("li")
+				var content = document.createTextNode(msg)
+	
+				message.append(content)
+				messages.append(message)
+			}
+		}
+		setMessages()
+
+		ws = new WebSocket(`ws://${window.location.host}/ws/${chatID}?token=${userToken}`);
+		ws.onmessage = function (event) {
+			data = JSON.parse(event.data)
+			switch (data.type) {
+				case "message":
+					const msg = parseMessage(data.content)
+
+					var messages = document.getElementById("messages")
+					var message = document.createElement("li")
+					var content = document.createTextNode(msg)
+
+					message.append(content)
+					messages.prepend(message)
+					break;
+
+				default:
+					console.log("some error: ", data)
+			}
+		};
+
+		function loadMoreMessages(event) {
+			setMessages()
+
+			event.preventDefault()
+		};
+
+		function sendMessage(event) {
+			var input = document.getElementById("messageText")
+			var message = {
+				type: "message",
+				content: input.value
+			}
+			ws.send(JSON.stringify(message))
+			input.value = ""
+			event.preventDefault()
+		};
+	</script>
+</body>
+
+</html>

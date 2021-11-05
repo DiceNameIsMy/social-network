@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, logger
 from fastapi.responses import HTMLResponse
 
 from settings import settings
@@ -15,8 +15,13 @@ manager = ConnectionsManager()
 
 @app.get('/')
 async def get():
-    with open('index.html', 'r') as file:
-        html = file.read()
+    if settings.debug:
+        with open('index.html', 'r') as file:
+            html = file.read()
+    else:
+        with open('index.prod.html', 'r') as file:
+            html = file.read()
+
     return HTMLResponse(html)
 
 @app.get('/info/')
@@ -34,6 +39,7 @@ async def websocket_endpoint(
 
     # if user or chat wasn't acquired close the connection
     if not (user and chat):
+        logger.logger.info(f'{user.is_authenticated=}, {chat.is_valid}')
         await websocket.close()
         return
     
