@@ -11,9 +11,5 @@ then
     echo "PostgreSQL started"
 fi
 
-python manage.py migrate --no-input
-python manage.py loaddata dumps/apps.json
-
-python manage.py collectstatic --no-input
 
 exec "$@"
