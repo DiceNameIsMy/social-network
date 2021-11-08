@@ -1,3 +1,5 @@
+from asgiref.sync import async_to_sync
+
 from django.contrib.auth import get_user_model
 
 from rest_framework.generics import (
@@ -11,6 +13,9 @@ from rest_framework.generics import (
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
+from channels.layers import channel_layers
+from channels import DEFAULT_CHANNEL_LAYER
+
 from apps.utils.filters import URLRelatedFilter, UserRelatedFilter
 from apps.utils.permissions import IsManyRelated
 from apps.chats.models import Chat, Membership, Message
@@ -23,6 +28,7 @@ from .serializers import (
 )
 
 UserModel = get_user_model()
+channel_layer = channel_layers[DEFAULT_CHANNEL_LAYER]
 
 
 class ChatListCreateView(ListCreateAPIView):
@@ -79,6 +85,21 @@ class ChatMessageListCreateView(ListCreateAPIView):
 
     serializer_class = MessageSerializer
     queryset = Message.objects.all()
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        data = {
+            'type': 'message',
+            'content': serializer.data
+        }
+        data['content']['sender'] = {
+            'pk': self.request.user.pk,
+            'username': self.request.user.username
+        }
+        async_to_sync(channel_layer.group_send)(
+            str(serializer.data['chat']),
+            data
+        )
 
 
 class ChatMessageRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):

@@ -112,11 +112,19 @@ class ChatSerializer(serializers.ModelSerializer):
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
-        fields = ['pk', 'chat', 'sender', 'datetime', 'text']
+        fields = ['pk', 'chat', 'sender', 'username', 'datetime', 'text']
     
     def to_internal_value(self, data):
-        data = data.copy()
+        data: dict = data.copy()
         data['chat'] = self.context['view'].kwargs[self.context['view'].url_related_kwarg]
         data['sender'] = self.context['request'].user.id
         return super().to_internal_value(data)
+
+
+class RoutingMessageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Message
+        fields = ['pk', 'chat', 'sender', 'username', 'datetime', 'text']
+
 

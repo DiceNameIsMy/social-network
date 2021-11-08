@@ -42,7 +42,7 @@
 			const raw_minute = dt.getMinutes()
 			const minute = raw_minute < 10 ? "0" + raw_minute : raw_minute
 
-			return (`${hour}:${minute}    ${msg.text}`)
+			return (`${msg.username} | ${hour}:${minute}    ${msg.text}`)
 		}
 
 		async function sendRequest (url) {
@@ -86,7 +86,7 @@
 		}
 		setMessages()
 
-		ws = new WebSocket(`ws://${window.location.host}/ws/${chatID}?token=${userToken}`);
+		ws = new WebSocket(`ws://${window.location.host}/ws/chat/${chatID}/?token=${userToken}`);
 		ws.onmessage = function (event) {
 			data = JSON.parse(event.data)
 			switch (data.type) {
@@ -105,6 +105,9 @@
 					console.log("some error: ", data)
 			}
 		};
+        ws.onclose = function(event) {
+            console.error('Chat socket closed unexpectedly');
+        };
 
 		function loadMoreMessages(event) {
 			setMessages()

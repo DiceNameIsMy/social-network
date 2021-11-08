@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
 
     'rest_framework',
+    'channels',
     
     'dj_rest_auth',
     'dj_rest_auth.registration',
@@ -134,4 +135,14 @@ REST_USE_JWT = True
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=3),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+}
+# Channels
+ASGI_APPLICATION = 'config.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('redis', 6379)],
+        },
+    },
 }

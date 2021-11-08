@@ -101,6 +101,9 @@ class Message(models.Model):
                 f'message sender should be a chat member'
             )
     
+    def username(self) -> str:
+        return self.sender.username
+
     def date(self):
         return self.datetime.date()
 
