@@ -140,9 +140,11 @@ SIMPLE_JWT = {
 ASGI_APPLICATION = 'config.asgi.application'
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'BACKEND': os.environ.get('CHANNELS_ENGINE', 'channels_redis.core.RedisChannelLayer'),
         'CONFIG': {
-            'hosts': [('redis', 6379)],
+            'hosts': [
+                (os.environ.get('REDIS_HOST', 'localhost'), os.environ.get('REDIS_PORT', '6379'))
+            ],
         },
     },
 }
