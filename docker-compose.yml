@@ -12,6 +12,23 @@ services:
     depends_on:
       - db
       - redis
+    volumes:
+      - django-app:/app
+
+  celery:
+    build:
+      context: './project'
+      dockerfile: './Dockerfile.celery'
+    container_name: 'social-network_celery'
+    command: celery -A config.celery worker -l INFO
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - app
+      - db
+      - redis
+    volumes:
+      - django-app:/app
 
   db:
     image: postgres:13-alpine
@@ -29,3 +46,4 @@ services:
 
 volumes:
   pg-data:
+  django-app:

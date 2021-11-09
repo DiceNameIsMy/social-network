@@ -24,7 +24,7 @@ from apps.chats.permissions import IsChatAdminOrMessageSender, IsChatAdminOrRead
 from .serializers import (
     ChatSerializer,
     MembershipSerializer,
-    MessageSerializer, 
+    APIMessageSerializer, 
 )
 
 UserModel = get_user_model()
@@ -83,7 +83,7 @@ class ChatMessageListCreateView(ListCreateAPIView):
     url_related_field = 'chat_id'
     url_related_kwarg = 'chat_pk'
 
-    serializer_class = MessageSerializer
+    serializer_class = APIMessageSerializer
     queryset = Message.objects.all()
 
     def perform_create(self, serializer):
@@ -108,6 +108,6 @@ class ChatMessageRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     url_related_field = 'chat_id'
     url_related_kwarg = 'chat_pk'
 
-    serializer_class = MessageSerializer
+    serializer_class = APIMessageSerializer
     queryset = Message.objects.all()
 

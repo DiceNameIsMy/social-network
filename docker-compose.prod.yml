@@ -12,11 +12,27 @@ services:
     expose:
       - 8000
     volumes:
+      - django:/app/web/
       - static_volume:/app/web/static
       - media_volume:/app/web/media
     depends_on:
       - db
       - redis
+
+  celery:
+    build:
+      context: './project'
+      dockerfile: './Dockerfile.prod.celery'
+    container_name: 'social-network_celery'
+    command: celery -A config.celery worker -l INFO
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - web
+      - db
+      - redis
+    volumes:
+      - django:/app/web/
 
   db:
     image: postgres:13-alpine
@@ -41,5 +57,6 @@ services:
 
 volumes:
   pg-data:
+  django:
   static_volume:
   media_volume:

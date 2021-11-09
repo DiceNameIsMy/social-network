@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 
 from apps.chats.models import Chat, Membership, Message
-from apps.chats.api.v1.serializers import RoutingMessageSerializer
+from apps.chats.api.v1.serializers import MessageSerializer
 
 
 UserModel = get_user_model()
@@ -95,7 +95,7 @@ class ChatConsumer(WebsocketConsumer):
         """
         data = json.loads(text_data)
         
-        serializer = RoutingMessageSerializer(data={
+        serializer = MessageSerializer(data={
             'chat': self.chat.pk,
             'sender': self.user.pk,
             'text': data['content']
