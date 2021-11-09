@@ -25,9 +25,6 @@ COPY . .
 RUN mkdir static/
 RUN mkdir media/
 
-RUN python manage.py migrate --no-input
-RUN python manage.py loaddata dumps/apps.json
-
 RUN python manage.py collectstatic --no-input
 
 # run entrypoint.sh
