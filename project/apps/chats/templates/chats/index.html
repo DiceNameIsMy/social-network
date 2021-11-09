@@ -7,14 +7,15 @@
 
 <body>
 	<h1>WebSocket Chat</h1>
-	<form action="" onSubmit="">
+	<form action="" onSubmit="connectWebsocket(event)" id="connectWebsocketForm">
 		<label for="token">Token</label>
 		<input type="text" id="token">
 		<label for="chat_id">Chat</label>
 		<input type="number" id="chat_id">
+		<button>Connect</button>
 	</form><br>
 
-	<form action="" onsubmit="sendMessage(event)">
+	<form action="" id="sendMessageForm" style="display: none;">
 		<label for="messageText">Message</label>
 		<input type="text" id="messageText" autocomplete="off" />
 		<button>Send</button>
@@ -28,14 +29,6 @@
 	</form>
 
 	<script>
-		const queryString = window.location.search;
-		const urlParams = new URLSearchParams(queryString);
-
-		const userToken = urlParams.get("token")
-		const chatID = urlParams.get("chat_id")
-
-		var nextMessageURL = `http://${window.location.host}/api/v1/chats/${chatID}/messages/?limit=30`
-
 		function parseMessage(msg) {
 			const dt = new Date(Date.parse(msg.datetime))
 			const hour = dt.getHours()
@@ -51,25 +44,20 @@
 				mode: "cors",
 				headers: {
 					"Content-Type": "application/json",
-					"Authorization": `Bearer ${userToken}`
+					"Authorization": `Bearer ${window.sessionStorage.userToken}`
 				}
 			})
 		};
 
 		async function setMessages() {
-			if (nextMessageURL === null) {
-				var loadMoreForm = document.getElementById("loadMoreForm")
-				loadMoreForm.style.display = "none";
-				return
-			}
-			const response = await sendRequest(nextMessageURL)
+			const response = await sendRequest(window.sessionStorage.nextMessageURL)
 			if (!response.ok) {
-				window.alert(`Couldn't get messages from chat with pk = ${chatID}`)
+				window.alert(`Couldn't get messages from chat with pk = ${window.sessionStorage.chatID}`)
 				return
 			}
 			const data = await response.json()
 			const last_messages = data.results
-			nextMessageURL = data.next
+			window.sessionStorage.nextMessageURL = data.next
 
 			var messages = document.getElementById("messages")
 			
@@ -83,49 +71,73 @@
 				message.append(content)
 				messages.append(message)
 			}
-		}
-		setMessages()
-
-		ws = new WebSocket(`ws://${window.location.host}/ws/chat/${chatID}/?token=${userToken}`);
-		ws.onmessage = function (event) {
-			data = JSON.parse(event.data)
-			switch (data.type) {
-				case "message":
-					const msg = parseMessage(data.content)
-
-					var messages = document.getElementById("messages")
-					var message = document.createElement("li")
-					var content = document.createTextNode(msg)
-
-					message.append(content)
-					messages.prepend(message)
-					break;
-
-				default:
-					console.log("some error: ", data)
+			if (window.sessionStorage.nextMessageURL === 'null') {
+				var loadMoreForm = document.getElementById("loadMoreForm")
+				loadMoreForm.style.display = "none";
 			}
-		};
-        ws.onclose = function(event) {
-            console.error('Chat socket closed unexpectedly');
-        };
+		}
 
-		function loadMoreMessages(event) {
+		function connectWebsocket(event) {
+            var token = document.getElementById("token")
+			var chatID = document.getElementById("chat_id")
+			window.sessionStorage.userToken = token.value
+			window.sessionStorage.chatID = chatID.value
+			token.value = ""
+			chatID.value = ""
+            
+			window.sessionStorage.nextMessageURL = `http://${window.location.host}/api/v1/chats/${window.sessionStorage.chatID}/messages/?limit=30`
+            
+			var ws = new WebSocket(`ws://${window.location.host}/ws/chat/${window.sessionStorage.chatID}/?token=${window.sessionStorage.userToken}`);
+			ws.onmessage = function (event) {
+                data = JSON.parse(event.data)
+				switch (data.type) {
+                    case "message":
+                        const msg = parseMessage(data.content)
+                        
+						var messages = document.getElementById("messages")
+						var message = document.createElement("li")
+						var content = document.createTextNode(msg)
+                        
+						message.append(content)
+						messages.prepend(message)
+						break;
+                        
+                        default:
+                            console.log("some error: ", data)
+                        }
+			};
+			ws.onclose = function(event) {
+                console.error('Chat socket closed unexpectedly');
+			};
+            window.sessionStorage.ws = ws
+			var connectWebsocketForm = document.getElementById("connectWebsocketForm")
+			connectWebsocketForm.style.display = "none"
+            
+            function sendMessage(event) {
+                var input = document.getElementById("messageText")
+                var message = {
+                    type: "message",
+                    content: input.value
+                }
+                ws.send(JSON.stringify(message))
+                input.value = ""
+                event.preventDefault()
+            };
+			var sendMessageForm = document.getElementById("sendMessageForm")
+			sendMessageForm.style.display = "initial"
+            sendMessageForm.onsubmit = sendMessage
+
 			setMessages()
 
 			event.preventDefault()
 		};
-
-		function sendMessage(event) {
-			var input = document.getElementById("messageText")
-			var message = {
-				type: "message",
-				content: input.value
-			}
-			ws.send(JSON.stringify(message))
-			input.value = ""
+        
+		function loadMoreMessages(event) {
+            setMessages()
+            
 			event.preventDefault()
 		};
-	</script>
+        </script>
 </body>
 
 </html>
