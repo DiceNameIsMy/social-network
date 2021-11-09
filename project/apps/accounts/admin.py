@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 
 from apps.chats.admin import MembershipInline
 
-from .models import CustomUser
+from .models import CustomUser, Notification
 
 
 @admin.register(CustomUser)
@@ -17,3 +17,10 @@ class CustomUserAdmin(UserAdmin):
         (('Important dates'), {'fields': (('date_joined', 'last_login'), )}),
     )
     inlines = [MembershipInline]
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('user', 'type', 'message', 'content_type', 'is_read', 'created_at')
+    list_filter = ('is_read', 'created_at', 'content_type')
+    search_fields = ('user__username', 'message')
