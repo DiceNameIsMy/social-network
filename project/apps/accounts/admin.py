@@ -21,6 +21,6 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'type', 'message', 'content_type', 'is_read', 'created_at')
+    list_display = ('user', 'type', 'content_type', 'is_read', 'created_at')
     list_filter = ('is_read', 'created_at', 'content_type')
     search_fields = ('user__username', 'message')

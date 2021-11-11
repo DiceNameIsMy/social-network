@@ -1,13 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.contrib.contenttypes.models import ContentType
 
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from apps.chats.models import Chat, Membership, Message
-from apps.accounts.models import NotificationType
-from apps.accounts.tasks import create_notification
+from apps.chats.tasks import create_chat_message_notification
 
 
 UserModel = get_user_model()
@@ -122,12 +120,8 @@ class MessageSerializer(serializers.ModelSerializer):
         """ Create message and send task to notificate chat members 
         """
         instance: Message = super().create(validated_data)
-        user = self.context['request'].user
-        create_notification(
-            user=self.context['request'].user,
-            notification_type=NotificationType.MESSAGE,
-            message=f'{user.username}: {instance.text[:64]}',
-            obj=instance,
+        create_chat_message_notification(
+            message=instance,
         )
         return instance
 

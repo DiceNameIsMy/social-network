@@ -24,8 +24,8 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = (
-            'pk', 'user', 'type', 'message', 
+            'pk', 'user', 'type', 'data',
             'content_type', 'object_id', 
-            'is_read', 'created_at'
+            'is_read', 'created_at', 
         )
         

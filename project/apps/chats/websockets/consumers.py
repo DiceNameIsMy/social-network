@@ -7,6 +7,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
 
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 
 from channels_redis.core import RedisChannelLayer
 
@@ -82,6 +83,7 @@ class ChatConsumer(WebsocketConsumer):
             self.close()
             return
 
+        cache.set(f"user_{self.user.pk}_online", True)
         # Join chat group
         async_to_sync(self.channel_layer.group_add)(
             f'chat_{self.chat.pk}',
@@ -90,6 +92,7 @@ class ChatConsumer(WebsocketConsumer):
 
     def disconnect(self, close_code):
         # Leave chat group
+        cache.set(f"user_{self.user.pk}_online", False)
         async_to_sync(self.channel_layer.group_discard)(
             f'chat_{self.chat.pk}',
             self.channel_name

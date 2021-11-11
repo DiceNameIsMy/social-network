@@ -2,12 +2,12 @@ from django.db import models
 
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-
+from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 
 
 class NotificationType(models.IntegerChoices):
-    MESSAGE = 1
+    CHAT_MESSAGE = 1
     FRIEND_REQUEST = 2
 
 
@@ -30,7 +30,7 @@ class Notification(models.Model):
     Type = NotificationType
     content_type_limit = (
         models.Q(app_label='accounts', model='customuser') |
-        models.Q(app_label='chats', model='message')
+        models.Q(app_label='chats', model='chat')
     )
 
     user = models.ForeignKey(
@@ -41,9 +41,7 @@ class Notification(models.Model):
     type = models.IntegerField(
         choices=Type.choices,
     )
-    message = models.CharField(
-        max_length=128
-    )
+    data = models.JSONField(default=dict)
     content_type = models.ForeignKey(
         to=ContentType,
         on_delete=models.CASCADE,
@@ -53,7 +51,8 @@ class Notification(models.Model):
     content_object = GenericForeignKey('content_type', 'object_id')
 
     is_read = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
 
     def __str__(self):
         return f'{self.user} - {self.content_object}'

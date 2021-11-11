@@ -3,6 +3,7 @@ from asgiref.sync import async_to_sync
 from django.contrib.auth import get_user_model
 
 from rest_framework.generics import (
+    RetrieveAPIView,
     get_object_or_404,
     ListAPIView,
     ListCreateAPIView,
@@ -77,7 +78,7 @@ class ChatMemberRetriveExpelView(RetrieveUpdateDestroyAPIView):
         super().check_object_permissions(request, obj)
 
 
-class ChatMessageListCreateView(ListCreateAPIView):
+class ChatMessageListCreateView(ListAPIView):
     permission_classes = [IsAuthenticated, IsChatMember]
     filter_backends = [URLRelatedFilter]
     url_related_field = 'chat_id'
@@ -85,7 +86,7 @@ class ChatMessageListCreateView(ListCreateAPIView):
 
     serializer_class = APIMessageSerializer
     queryset = Message.objects.all()
-
+ 
     def perform_create(self, serializer):
         super().perform_create(serializer)
         data = {
@@ -93,12 +94,12 @@ class ChatMessageListCreateView(ListCreateAPIView):
             'content': serializer.data
         }
         async_to_sync(channel_layer.group_send)(
-            str(serializer.data['chat']),
+            f'chat_{serializer.data["chat"]}',
             data
         )
 
 
-class ChatMessageRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+class ChatMessageRetrieveUpdateDestroyView(RetrieveAPIView):
     permission_classes = [IsAuthenticated, IsChatAdminOrMessageSender]
     filter_backends = [URLRelatedFilter]
     url_related_field = 'chat_id'
