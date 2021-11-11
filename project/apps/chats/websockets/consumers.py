@@ -7,7 +7,8 @@ from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
 
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
+
+from channels_redis.core import RedisChannelLayer
 
 from apps.chats.models import Chat, Membership, Message
 from apps.chats.api.v1.serializers import MessageSerializer
@@ -17,28 +18,33 @@ UserModel = get_user_model()
 
 
 class ChatConsumer(WebsocketConsumer):
+    channel_layer: RedisChannelLayer
     token: AccessToken = None
-    chat_id: int = None
     user: UserModel = None
+    chat_id: int = None
     chat: Chat = None
     
     errors = []
 
+    def has_permission(self) -> bool:
+        is_authenticated = self.authenticate()
+        is_chat_member = self.is_chat_member()
+        return (is_authenticated and is_chat_member)
+
     def authenticate(self) -> bool:
-        """ Authenticate user and return bool when 
-        token is valid and user has access to chat
+        """ Authenticate user
         """
         try:
             self.token = AccessToken(self.query_params.get('token'))
-            self.user = get_object_or_404(
-                UserModel, 
+            self.user = UserModel.objects.get( 
                 pk=self.token.payload['user_id']
             )
-            return self.is_chat_member()
+            return True
         except TokenError:
-            self.errors
+            self.errors.append('invalid token')
             return False
         except UserModel.DoesNotExist:
+            self.errors.append(f'user with pk={self.user.pk} does not exist')
             return False
 
     def is_chat_member(self) -> bool:
@@ -49,11 +55,13 @@ class ChatConsumer(WebsocketConsumer):
         except Chat.DoesNotExist:
             self.errors.append(f'chat with pk={self.chat_id} does not exist')
             return False
-        else:
-            self.chat = chat
-            is_chat_member = self.user in chat.members.all()
+    
+        self.chat = chat
+        is_chat_member = self.user in chat.members.all()
+        if not is_chat_member:
+            self.errors.append(f'user with pk={self.user.pk} is not a member of chat with pk={self.chat_id}')
 
-            return is_chat_member
+        return is_chat_member
 
     def send_errors(self):
         """ send error messages to client
@@ -69,24 +77,21 @@ class ChatConsumer(WebsocketConsumer):
         self.query_params = dict(
             param.split('=') for param in self.scope['query_string'].decode().split('&') if param
         )
-        if not self.authenticate():
-            self.send(json.dumps({
-                'type': 'error',
-                'content': self.errors
-            }))
+        if not self.has_permission():
+            self.send_errors()
             self.close()
             return
-        
+
         # Join chat group
         async_to_sync(self.channel_layer.group_add)(
-            self.chat_id,
+            f'chat_{self.chat.pk}',
             self.channel_name
         )
 
     def disconnect(self, close_code):
         # Leave chat group
         async_to_sync(self.channel_layer.group_discard)(
-            self.chat_id,
+            f'chat_{self.chat.pk}',
             self.channel_name
         )
 
@@ -113,7 +118,7 @@ class ChatConsumer(WebsocketConsumer):
         }
         # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
-            self.chat_id,
+            f'chat_{self.chat.pk}',
             message_data
         )
 

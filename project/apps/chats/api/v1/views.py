@@ -92,10 +92,6 @@ class ChatMessageListCreateView(ListCreateAPIView):
             'type': 'message',
             'content': serializer.data
         }
-        data['content']['sender'] = {
-            'pk': self.request.user.pk,
-            'username': self.request.user.username
-        }
         async_to_sync(channel_layer.group_send)(
             str(serializer.data['chat']),
             data
