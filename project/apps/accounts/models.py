@@ -7,7 +7,7 @@ from django.contrib.auth.models import AbstractUser
 
 
 class NotificationType(models.IntegerChoices):
-    MESSASE = 1
+    MESSAGE = 1
     FRIEND_REQUEST = 2
 
 

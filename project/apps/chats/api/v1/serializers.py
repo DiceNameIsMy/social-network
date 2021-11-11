@@ -125,7 +125,7 @@ class MessageSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         create_notification(
             user=self.context['request'].user,
-            notification_type=NotificationType.MESSASE,
+            notification_type=NotificationType.MESSAGE,
             message=f'{user.username}: {instance.text[:64]}',
             obj=instance,
         )
