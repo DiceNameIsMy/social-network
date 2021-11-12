@@ -49,7 +49,7 @@ class UserChatsView(ListAPIView):
 
 class NotificationMarkAsRead(GenericAPIView):
     permission_classes = [IsAuthenticated, IsRelated]
-    related_field = 'user'
+    user_field = 'user'
 
     serializer_class = NotificationSerializer
     queryset = Notification.objects.all().only('pk', 'is_read')
