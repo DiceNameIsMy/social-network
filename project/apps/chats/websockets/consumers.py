@@ -42,7 +42,7 @@ class ChatConsumer(WebsocketConsumer):
             )
             return True
         except TokenError:
-            self.errors.append('invalid token')
+            self.errors.append('given token is not valid')
             return False
         except UserModel.DoesNotExist:
             self.errors.append(f'user with pk={self.user.pk} does not exist')
@@ -106,11 +106,11 @@ class ChatConsumer(WebsocketConsumer):
         serializer = MessageSerializer(data={
             'chat': self.chat.pk,
             'sender': self.user.pk,
-            'text': data['content']
+            'text': data.get('content')
         })
 
         if not serializer.is_valid():
-            self.errors += list(serializer.errors.values())
+            self.errors.append(serializer.errors)
             self.send_errors()
             return
     
