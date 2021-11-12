@@ -8,9 +8,9 @@ from .views import (
     ChatMembersViewSet,
 )
 router = DefaultRouter()
-router.register('', ChatViewSet, basename='chats')
-router.register(r'(?P<chat_pk>\w+)/messages', ChatMessageViewSet, basename='messages')
-router.register(r'(?P<chat_pk>\w+)/members', ChatMembersViewSet, basename='members')
+router.register('', ChatViewSet, basename='chat')
+router.register(r'(?P<chat_pk>\w+)/messages', ChatMessageViewSet, basename='message')
+router.register(r'(?P<chat_pk>\w+)/members', ChatMembersViewSet, basename='member')
 
 
 urlpatterns = [

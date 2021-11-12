@@ -11,6 +11,8 @@
 2. update .env files and `docker-compose.prod.yml` if you want
 2. run `docker-compose -f docker-compose.prod.yml up --build`
 
+### Docs located at `schema/docs/`
+
 ### Enums
 #### Notification
 | ID | Name | Description |

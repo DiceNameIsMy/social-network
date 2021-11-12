@@ -5,8 +5,12 @@ from apps.utils.permissions import IsManyRelated
 from apps.utils.views import ListCRUDViewSet, ListRetrieveViewSet
 
 from apps.chats.models import Chat, Membership, Message
-from apps.chats.permissions import IsChatAdminOrMessageSender, IsChatAdminOrReadOnly, IsChatMember, IsChatAdminIfChange
-
+from apps.chats.permissions import (
+    IsChatAdminOrMessageSender, 
+    IsChatAdminOrReadOnly, 
+    IsChatMember, 
+    IsChatAdminIfChange
+)
 from .serializers import (
     ChatSerializer,
     MembershipSerializer,

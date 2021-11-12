@@ -32,7 +32,7 @@ class Chat(models.Model):
         related_name='chats'
     )
 
-    def members_amount(self):
+    def members_amount(self) -> int:
         return self.memberships.count()
 
     def __str__(self) -> str:
