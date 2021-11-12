@@ -7,13 +7,13 @@ from django.contrib.auth import get_user_model
 
 UserModel = get_user_model()
 
-class MembershipType(models.IntegerChoices):
-    ADMIN = 1
-    REGULAR = 2
-
 class ChatType(models.IntegerChoices):
     COMMON = 1
     DIRECT = 2
+
+class MembershipType(models.IntegerChoices):
+    ADMIN = 1
+    REGULAR = 2
 
 
 class Chat(models.Model):

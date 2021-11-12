@@ -1,25 +1,18 @@
 from django.urls import path, include
 
+from rest_framework.routers import DefaultRouter
+
 from .views import (
-    ChatListCreateView,
-    ChatRetrieveDestroyView,
-    ChatMembersListAddView,
-    ChatMemberRetriveExpelView,
-    ChatMessageListCreateView,
-    ChatMessageRetrieveUpdateDestroyView,
+    ChatViewSet,
+    ChatMessageViewSet,
+    ChatMembersViewSet,
 )
+router = DefaultRouter()
+router.register('', ChatViewSet, basename='chats')
+router.register(r'(?P<chat_pk>\w+)/messages', ChatMessageViewSet, basename='messages')
+router.register(r'(?P<chat_pk>\w+)/members', ChatMembersViewSet, basename='members')
+
 
 urlpatterns = [
-    # Chat
-    path('', ChatListCreateView.as_view(), name='all_user_common_chats'),
-    path('<int:pk>/', ChatRetrieveDestroyView.as_view(), name='chat_detail'),
-    
-    # Chat related
-    path('<int:chat_pk>/', include([
-        path('members/', ChatMembersListAddView.as_view(), name='chat_members'),
-        path('members/<int:pk>/', ChatMemberRetriveExpelView.as_view(), name='chat_member_detail'),
-
-        path('messages/', ChatMessageListCreateView.as_view(), name='chat_messages'),
-        path('messages/<int:pk>/', ChatMessageRetrieveUpdateDestroyView.as_view(), name='chat_message_detail'),
-    ])),
+    path('', include(router.urls)),
 ]
