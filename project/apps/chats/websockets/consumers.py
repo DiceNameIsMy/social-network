@@ -1,18 +1,21 @@
 import json
 
 from asgiref.sync import async_to_sync
-from channels.generic.websocket import WebsocketConsumer
+
+from django.contrib.auth import get_user_model
+from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
 
-from django.contrib.auth import get_user_model
-from django.core.cache import cache
-
+from channels.generic.websocket import WebsocketConsumer
 from channels_redis.core import RedisChannelLayer
 
 from apps.chats.models import Chat, Membership, Message
 from apps.chats.api.v1.serializers import MessageSerializer
+
+from .exceptions import WebSocketException, EmptyFieldException
 
 
 UserModel = get_user_model()
@@ -20,98 +23,62 @@ UserModel = get_user_model()
 
 class ChatConsumer(WebsocketConsumer):
     channel_layer: RedisChannelLayer
+
+    raw_token: str = None
+    user_pk: int = None
+    chat_id: int = None
+
     token: AccessToken = None
     user: UserModel = None
-    chat_id: int = None
     chat: Chat = None
-    
-    errors = []
 
-    def has_permission(self) -> bool:
-        is_authenticated = self.authenticate()
-        is_chat_member = self.is_chat_member()
-        return (is_authenticated and is_chat_member)
-
-    def authenticate(self) -> bool:
-        """ Authenticate user
-        """
-        try:
-            self.token = AccessToken(self.query_params.get('token'))
-            self.user = UserModel.objects.get( 
-                pk=self.token.payload['user_id']
-            )
-            return True
-        except TokenError:
-            self.errors.append('given token is not valid')
-            return False
-        except UserModel.DoesNotExist:
-            self.errors.append(f'user with pk={self.user.pk} does not exist')
-            return False
-
-    def is_chat_member(self) -> bool:
-        """ Validates that user is a member of a chat
-        """
-        try:
-            chat = Chat.objects.prefetch_related('members').get(pk=self.chat_id)
-        except Chat.DoesNotExist:
-            self.errors.append(f'chat with pk={self.chat_id} does not exist')
-            return False
-    
-        self.chat = chat
-        is_chat_member = self.user in chat.members.all()
-        if not is_chat_member:
-            self.errors.append(f'user with pk={self.user.pk} is not a member of chat with pk={self.chat_id}')
-
-        return is_chat_member
-
-    def send_errors(self):
-        """ send error messages to client
-        """
-        self.send(json.dumps({
-            'type': 'error',
-            'content': self.errors
-        }))
 
     def connect(self):
         self.accept()
-        self.chat_id = self.scope['url_route']['kwargs']['chat_id']
-        self.query_params = dict(
-            param.split('=') for param in self.scope['query_string'].decode().split('&') if param
-        )
-        if not self.has_permission():
-            self.send_errors()
-            self.close()
-            return
+        self.set_connection_parameters()
 
-        cache.set(f"user_{self.user.pk}_online", True)
-        # Join chat group
-        async_to_sync(self.channel_layer.group_add)(
-            f'chat_{self.chat.pk}',
-            self.channel_name
-        )
+        if self.has_permission():
+            cache.set(f"user_{self.user.pk}_online", True)
+            async_to_sync(self.channel_layer.group_add)(
+                f'chat_{self.chat.pk}',
+                self.channel_name
+            )
+        else:
+            self.close()
 
     def disconnect(self, close_code):
-        # Leave chat group
-        cache.set(f"user_{self.user.pk}_online", False)
-        async_to_sync(self.channel_layer.group_discard)(
-            f'chat_{self.chat.pk}',
-            self.channel_name
-        )
+        if self.user and self.chat:
+            cache.set(f"user_{self.user.pk}_online", False)
+            async_to_sync(self.channel_layer.group_discard)(
+                f'chat_{self.chat.pk}',
+                self.channel_name
+            )
 
-    def receive(self, text_data=None):
-        """ Recieve message from client.
+    def receive(self, text_data):
+        """ Receive message from client.
         """
         data = json.loads(text_data)
-        
+
+        try:
+            data_type = data['type']
+            if data_type == 'message':
+                self.send_message(data['content'])
+            else:
+                self.send_error(f'unknown message type: {data_type}')
+        except KeyError:
+            self.send_error('unvalid request body')
+
+    def send_message(self, message: str):
+        """ client sent a message
+        """
         serializer = MessageSerializer(data={
             'chat': self.chat.pk,
             'sender': self.user.pk,
-            'text': data.get('content')
+            'text': message
         })
-
         if not serializer.is_valid():
-            self.errors.append(serializer.errors)
-            self.send_errors()
+            self.error_message = serializer.errors
+            self.send_error(str(serializer.errors))
             return
     
         serializer.save()
@@ -125,8 +92,62 @@ class ChatConsumer(WebsocketConsumer):
             message_data
         )
 
-    def message(self, event):
-        """ called when new message was sent by other user
+    def has_permission(self) -> bool:
+        try:
+            self.authenticate()
+            self.is_chat_member()
+            return True
+        except (WebSocketException, TokenError) as e:
+            self.send_error(e)
+        except UserModel.DoesNotExist as e:
+            self.send_error('User was not found')
+        except Chat.DoesNotExist as e:
+            self.send_error('Chat was not found')
+        finally:
+            return False
+
+    def authenticate(self):
+        """ Authenticate user
         """
-        # Send message to client
+        if not self.raw_token:
+            raise EmptyFieldException('token')
+
+        self.token = AccessToken(self.raw_token)
+        user_pk = self.token.payload.get('user_id')
+        self.user = UserModel.objects.get( 
+            pk=user_pk
+        )
+
+    def is_chat_member(self):
+        """ Validates that user is a member of a chat
+        """
+        chat = Chat.objects.prefetch_related('members').get(pk=self.chat_id)
+        self.chat = chat
+
+        is_chat_member = self.user in chat.members.all()
+        if not is_chat_member:
+            raise WebSocketException(
+                f'user is not a member of this chat'
+            )
+
+    def send_error(self, message: str):
+        """ send error message to client
+        """
+        self.send(json.dumps({
+            'type': 'error',
+            'content': str(message)
+        }))
+
+    def set_connection_parameters(self):
+        """ Called on connection
+        """
+        self.query_params = dict(
+            param.split('=') for param in self.scope['query_string'].decode().split('&') if param
+        )
+        self.chat_id = self.scope['url_route']['kwargs']['chat_id']
+        self.raw_token = self.query_params.get('token')
+
+    def message(self, event):
+        """ new message was recieved
+        """
         self.send(text_data=json.dumps(event))
