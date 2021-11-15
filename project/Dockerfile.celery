@@ -22,7 +22,4 @@ RUN chmod +x /app/entrypoint.sh
 
 COPY . .
 
-RUN mkdir static/
-RUN mkdir media/
-
 CMD [ "celery", "-A", "config.celery", "worker", "-l", "INFO" ]
