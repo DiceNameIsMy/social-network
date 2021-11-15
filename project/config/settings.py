@@ -182,3 +182,9 @@ CHANNEL_LAYERS = {
         },
     },
 }
+CHANNEL_GROUPS_PREFIXES = {
+    'CHAT': 'chat.'
+}
+REDIS_GROUPS_PREFIXES = {
+    'ONLINE_USERS': 'user.online.'
+}

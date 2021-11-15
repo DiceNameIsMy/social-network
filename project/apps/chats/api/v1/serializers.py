@@ -5,7 +5,6 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from apps.chats.models import Chat, Membership, Message
-from apps.chats.tasks import create_chat_message_notification
 
 
 UserModel = get_user_model()
@@ -122,23 +121,11 @@ class ChatSerializer(serializers.ModelSerializer):
         ])
 
 
-class MessageSerializer(serializers.ModelSerializer):
-
+class APIMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ['pk', 'chat', 'sender', 'username', 'datetime', 'text']
 
-    def create(self, validated_data):
-        """ Create message and send task to notificate chat members 
-        """
-        instance: Message = super().create(validated_data)
-        create_chat_message_notification(
-            message=instance,
-        )
-        return instance
-
-
-class APIMessageSerializer(MessageSerializer):
     def to_internal_value(self, data):
         data: dict = data.copy()
         data['chat'] = self.context['view'].kwargs[self.context['view'].url_related_kwarg]

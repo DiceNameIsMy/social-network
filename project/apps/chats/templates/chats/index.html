@@ -91,7 +91,7 @@
 			ws.onmessage = function (event) {
                 data = JSON.parse(event.data)
 				switch (data.type) {
-                    case "message":
+                    case "chat_message":
                         const msg = parseMessage(data.content)
                         
 						var messages = document.getElementById("messages")
@@ -116,7 +116,7 @@
             function sendMessage(event) {
                 var input = document.getElementById("messageText")
                 var message = {
-                    type: "message",
+                    type: "chat_message",
                     content: input.value
                 }
                 ws.send(JSON.stringify(message))
