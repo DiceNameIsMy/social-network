@@ -20,11 +20,12 @@ channel_layer: RedisChannelLayer = channel_layers[DEFAULT_CHANNEL_LAYER]
 
 @shared_task
 def create_chat_message_notification(
-    message: Message
+    message_pk: int
 ):
     """
     Create notification and send it to online users
     """
+    message = Message.objects.get(pk=message_pk)
     chat_members = message.chat.members.all()
     chat_content_type = ContentType.objects.get_for_model(message.chat)
     chat_notifications = Notification.objects.filter(
@@ -59,3 +60,4 @@ def create_chat_message_notification(
         })
         notification.created_at = timezone.now()
         notification.save()
+        return True

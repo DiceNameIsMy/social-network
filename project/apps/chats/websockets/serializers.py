@@ -13,8 +13,8 @@ class MessageSerializer(serializers.ModelSerializer):
         """ Create message and send task to notificate chat members 
         """
         instance: Message = super().create(validated_data)
-        create_chat_message_notification(
-            message=instance,
+        create_chat_message_notification.delay(
+            message_pk=instance.pk,
         )
         return instance
 
