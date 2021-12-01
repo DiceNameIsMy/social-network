@@ -12,18 +12,13 @@ RUN apk update \
 
 # install dependencies
 ADD requirements.txt .
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip -r requirements.txt
 
 # copy entrypoint.sh
 ADD ./entrypoint.sh .
-RUN sed -i 's/\r$//g' /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+RUN sed -i 's/\r$//g' /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 COPY . .
-
-RUN mkdir static/
-RUN mkdir media/
 
 RUN python manage.py collectstatic --no-input
 
