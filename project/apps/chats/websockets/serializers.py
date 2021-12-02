@@ -4,6 +4,13 @@ from apps.chats.models import Message
 from apps.chats.tasks import create_chat_message_notification
 
 
+WEBOSCKET_MESSAGE_CHOICES = (
+    (1, 'error'),
+    (2, 'message'),
+    (3, 'notification'),
+)
+
+
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
@@ -18,3 +25,14 @@ class MessageSerializer(serializers.ModelSerializer):
         )
         return instance
 
+
+class WebsocketChatMessageContentSerializer(serializers.Serializer):
+    """ Serializer for message from websocket
+    """
+    chat_id = serializers.IntegerField()
+    text = serializers.CharField()
+
+    def validate_chat_id(self, value):
+        if value not in self.context['chat_ids']:
+            raise serializers.ValidationError('user is not a member of a given chat')
+    

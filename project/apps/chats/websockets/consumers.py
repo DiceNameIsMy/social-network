@@ -15,7 +15,7 @@ from channels.exceptions import DenyConnection
 from channels_redis.core import RedisChannelLayer
 
 from apps.chats.models import Chat
-from .serializers import MessageSerializer
+from .serializers import MessageSerializer, WebsocketChatMessageContentSerializer
 
 
 UserModel = get_user_model()
@@ -54,29 +54,35 @@ class ChatConsumer(WebsocketConsumer):
         self.init_connection()
         self.set_user_online(True)
         # group adding happens here because DenyConnection
-        # is not being catched in websocket_connection and
-        # adding user to group before checking permissions
-        # is not a good idea
-        async_to_sync(self.channel_layer.group_add)(
-            f'{self.chat_prefix}{self.chat_pk}',
-            self.channel_name
-        )
+        # is not being catched in websocket_connection
+        for membership in self.memberships:
+            group_name = f'{self.chat_prefix}{membership.chat.pk}'
+            async_to_sync(self.channel_layer.group_add)(
+                group_name,
+                self.channel_name
+            )
+            self.groups.append(group_name)
         self.accept()
 
     def disconnect(self, code):
         self.set_user_online(False)
-        # removing group manually because we added it manually too
-        async_to_sync(self.channel_layer.group_discard)(
-            f'{self.chat_prefix}{self.chat_pk}',
-            self.channel_name
-        )
 
-    def receive(self, text_data=None, bytes_data=None):
+    def receive(self, text_data=None):
+        """
+        recieve message from client
+        """
+        # TODO decompose this method
         data = json.loads(text_data)
         try:
             message_type = data['type']
             if message_type == MESSAGE_TYPES['MESSAGE']:
-                self.send_text_message(data['content'])
+                chat_ids = [m.chat.pk for m in self.memberships]
+                serializer = WebsocketChatMessageContentSerializer(data=data['content'], context={'chat_ids': chat_ids})
+                if serializer.is_valid():
+                    self.send_text_message(data['content'])
+                else:
+                    self.send_error_message(serializer.errors)
+
             elif message_type == MESSAGE_TYPES['ERROR']:
                 self.send_error_message('Unsupported message type')
             else:
@@ -90,22 +96,23 @@ class ChatConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps(message))
     # 
 
-    def send_text_message(self, message: str):
-        """ attempts to create a message and send it to the chat.
+    def send_text_message(self, content: dict):
+        """
+        attempts to create a message and send it to the chat.
         will return an error message to a client otherwise
         """
-        serializer = self.get_serializer(message)
+        serializer = self.get_message_serializer(content)
         if not serializer.is_valid():
             self.send_error_message(serializer.errors)
             return
     
         serializer.save()
-        message = MSG_FORMAT.copy()
-        message['content'] = serializer.data
+        msg_content = MSG_FORMAT.copy()
+        msg_content['content'] = serializer.data
 
         async_to_sync(self.channel_layer.group_send)(
-            f'{self.chat_prefix}{self.chat_pk}',
-            message
+            f'{self.chat_prefix}{content["chat_id"]}',
+            msg_content
         )
 
     def send_error_message(self, message: str):
@@ -114,36 +121,34 @@ class ChatConsumer(WebsocketConsumer):
         self.send(json.dumps(data))
 
     def set_user_online(self, status: bool):
-        """ sets user online status in cache to decide 
+        """ 
+        sets user online status in cache to decide 
         wrether to create a notification or not
         """
         cache.set(f'{self.user_online_prefix}{self.user_pk}', status)
 
-    def get_serializer(self, message: str):
+    def get_message_serializer(self, content: dict):
         serializer = self.message_serializer(data={
-            'chat': self.chat.pk,
+            'chat': content['chat_id'],
             'sender': self.user.pk,
-            'text': message
+            'text': content['text']
         })
         return serializer
 
     def init_connection(self):
-        """ Initializes connection.
+        """ 
+        Initializes connection.
         raises DenyConnection if connection is not allowed.
         """
         query_string = self.scope['query_string'].decode()
         self.query_params = dict(
             param.split('=') for param in query_string.split('&') if param
         )
-        try:
-            self.chat_pk = int(self.scope['url_route']['kwargs']['chat_id'])
-            self.raw_token = str(self.query_params.get('token'))
-        except ValueError:
-            raise DenyConnection('Invalid request')
+        self.raw_token = str(self.query_params.get('token'))
 
         self.token = self._get_token()
         self.user = self._get_user()
-        self.chat = self._get_chat()
+        self.memberships = self._get_memberships()
 
     def _get_token(self):
         try:
@@ -173,4 +178,7 @@ class ChatConsumer(WebsocketConsumer):
         except Chat.DoesNotExist:
             raise DenyConnection('User is not a member of this chat')
         return chat
+    
+    def _get_memberships(self):
+        return self.user.memberships.select_related('chat').all()
 
